@@ -11,9 +11,6 @@ are intelligently categorized, promoting organized and streamlined discussion in
 as blocking unwanted users, silent mode in topics for discreet conversations, and more. Improve group communication with
 Support Bot!
 
-* Bot example: [@nessshonSupportBot](https://t.me/nessshonSupportBot)
-* Linked group example: [@nessshonSupportGroup](https://t.me/nessshonSupportGroup)
-
 **About Limits**:
 <blockquote>
 Specific limits are not specified in the documentation, but the community has shared some rough numbers. 
@@ -71,8 +68,6 @@ Specific limits are not specified in the documentation, but the community has sh
 
 <details>
 <summary><b>Installation</b></summary>
-
-You need your own server or you can rent one from a hosting provider. For this, check out the [Recommended Hosting Provider](#recommended-hosting-provider) section below.
 
 1. Clone the repository:
 
