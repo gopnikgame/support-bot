@@ -159,19 +159,19 @@ manage_container() {
     case $action in
         "restart")
             log "BLUE" "🔄 Перезапуск контейнера..."
-            docker_compose_cmd -f docker/docker-compose.yml down --remove-orphans || force_remove_container
-            docker_compose_cmd -f docker/docker-compose.yml up -d
+            docker_compose_cmd -f docker-compose.yml down --remove-orphans || force_remove_container
+            docker_compose_cmd -f docker-compose.yml up -d
             ;;
         "stop")
             log "BLUE" "⏹️ Остановка контейнера..."
-            docker_compose_cmd -f docker/docker-compose.yml down --remove-orphans || force_remove_container
+            docker_compose_cmd -f docker-compose.yml down --remove-orphans || force_remove_container
             ;;
         "start")
             log "BLUE" "▶️ Запуск контейнера..."
             if docker ps -a | grep -q "$BOT_NAME"; then
                 force_remove_container
             fi
-            docker_compose_cmd -f docker/docker-compose.yml up -d
+            docker_compose_cmd -f docker-compose.yml up -d
             ;;
     esac
 
@@ -181,12 +181,12 @@ manage_container() {
 
         if ! docker ps | grep -q "$BOT_NAME"; then
             log "RED" "❌ Ошибка запуска контейнера"
-            docker_compose_cmd -f docker/docker-compose.yml logs
+            docker_compose_cmd -f docker-compose.yml logs
             return 1
         fi
 
         log "GREEN" "✅ Контейнер запущен"
-        docker_compose_cmd -f docker/docker-compose.yml logs --tail=10
+        docker_compose_cmd -f docker-compose.yml logs --tail=10
     fi
 }
 
