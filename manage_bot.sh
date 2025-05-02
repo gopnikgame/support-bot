@@ -40,12 +40,206 @@ log() {
     echo -e "${!level}${message}${NC}"
 }
 
+# Функция для проверки и коррекции установки Docker
+check_fix_docker() {
+    log "BLUE" "🔍 Проверка установки Docker..."
+    
+    # Проверяем, установлен ли Docker через snap
+    if command -v snap &> /dev/null && snap list 2>/dev/null | grep -q docker; then
+        log "YELLOW" "⚠️ Обнаружен Docker, установленный через snap. Рекомендуется удалить его и установить официальную версию."
+        
+        read -r -p "Удалить Docker (snap) и установить официальную версию? [Y/n] " response
+        response=${response:-Y}
+        
+        if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+            log "BLUE" "🔄 Удаление Docker, установленного через snap..."
+            
+            # Останавливаем все контейнеры перед удалением Docker
+            log "YELLOW" "⚠️ Останавливаем все запущенные контейнеры..."
+            docker ps -q | xargs -r docker stop || true
+            
+            # Удаляем Docker через snap
+            sudo snap remove docker || {
+                log "RED" "❌ Не удалось удалить Docker через snap"
+                return 1
+            }
+            
+            log "GREEN" "✅ Docker (snap) удален"
+            
+            # Установка официальной версии Docker
+            log "BLUE" "⬇️ Установка официальной версии Docker..."
+            
+            # Обновляем информацию о пакетах
+            sudo apt-get update
+            
+            # Устанавливаем необходимые пакеты для добавления репозитория
+            sudo apt-get install -y ca-certificates curl gnupg || {
+                log "RED" "❌ Ошибка при установке необходимых пакетов"
+                return 1
+            }
+            
+            # Создаем директорию для ключей
+            sudo install -m 0755 -d /etc/apt/keyrings
+            
+            # Скачиваем официальный ключ Docker и добавляем его в keyring
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            sudo chmod a+r /etc/apt/keyrings/docker.gpg
+            
+            # Добавляем репозиторий Docker
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
+                sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            
+            # Обновляем информацию о пакетах после добавления репозитория
+            sudo apt-get update
+            
+            # Устанавливаем Docker Engine, containerd и Docker Compose
+            sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose || {
+                log "RED" "❌ Ошибка при установке Docker"
+                return 1
+            }
+            
+            # Добавляем текущего пользователя в группу docker
+            sudo usermod -aG docker "$CURRENT_USER"
+            
+            log "GREEN" "✅ Docker успешно установлен"
+            log "YELLOW" "⚠️ Для применения изменений в группах пользователей может потребоваться перезайти в систему"
+            
+            # Проверяем установку
+            if command -v docker &> /dev/null; then
+                docker --version
+                docker-compose --version
+                log "GREEN" "✅ Docker и Docker Compose установлены и готовы к использованию"
+            else
+                log "RED" "❌ Возникла проблема с установкой Docker"
+                return 1
+            fi
+            
+            # Спрашиваем пользователя, хочет ли он перезайти в систему
+            read -r -p "Изменения в группах требуют перезахода в систему. Выйти сейчас? [y/N] " response
+            response=${response:-N}
+            
+            if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+                log "YELLOW" "⚠️ Выход из системы. После повторного входа запустите скрипт снова."
+                exit 0
+            fi
+        else
+            log "YELLOW" "⚠️ Продолжение работы с Docker, установленным через snap. Возможны ограничения."
+        fi
+    else
+        # Проверяем наличие Docker
+        if ! command -v docker &> /dev/null; then
+            log "YELLOW" "⚠️ Docker не установлен. Необходимо установить Docker для работы бота."
+            
+            read -r -p "Установить официальную версию Docker? [Y/n] " response
+            response=${response:-Y}
+            
+            if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+                log "BLUE" "⬇️ Установка официальной версии Docker..."
+                
+                # Обновляем информацию о пакетах
+                sudo apt-get update
+                
+                # Устанавливаем необходимые пакеты для добавления репозитория
+                sudo apt-get install -y ca-certificates curl gnupg || {
+                    log "RED" "❌ Ошибка при установке необходимых пакетов"
+                    return 1
+                }
+                
+                # Создаем директорию для ключей
+                sudo install -m 0755 -d /etc/apt/keyrings
+                
+                # Скачиваем официальный ключ Docker и добавляем его в keyring
+                curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+                sudo chmod a+r /etc/apt/keyrings/docker.gpg
+                
+                # Определяем дистрибутив для репозитория
+                DIST=$(lsb_release -cs)
+                
+                # Добавляем репозиторий Docker
+                echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $DIST stable" | \
+                    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+                
+                # Обновляем информацию о пакетах после добавления репозитория
+                sudo apt-get update
+                
+                # Устанавливаем Docker Engine, containerd и Docker Compose
+                sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose || {
+                    log "RED" "❌ Ошибка при установке Docker"
+                    return 1
+                }
+                
+                # Добавляем текущего пользователя в группу docker
+                sudo usermod -aG docker "$CURRENT_USER"
+                
+                log "GREEN" "✅ Docker успешно установлен"
+                log "YELLOW" "⚠️ Для применения изменений в группах пользователей может потребоваться перезайти в систему"
+                
+                # Проверяем установку
+                if command -v docker &> /dev/null; then
+                    docker --version
+                    docker-compose --version
+                    log "GREEN" "✅ Docker и Docker Compose установлены и готовы к использованию"
+                else
+                    log "RED" "❌ Возникла проблема с установкой Docker"
+                    return 1
+                fi
+                
+                # Спрашиваем пользователя, хочет ли он перезайти в систему
+                read -r -p "Изменения в группах требуют перезахода в систему. Выйти сейчас? [y/N] " response
+                response=${response:-N}
+                
+                if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+                    log "YELLOW" "⚠️ Выход из системы. После повторного входа запустите скрипт снова."
+                    exit 0
+                fi
+            else
+                log "RED" "❌ Docker требуется для работы бота. Установка отменена."
+                return 1
+            fi
+        else
+            log "GREEN" "✅ Обнаружена стандартная установка Docker"
+            docker --version
+            
+            # Проверяем Docker Compose
+            if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+                log "YELLOW" "⚠️ Docker Compose не установлен"
+                
+                read -r -p "Установить Docker Compose? [Y/n] " response
+                response=${response:-Y}
+                
+                if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+                    log "BLUE" "⬇️ Установка Docker Compose..."
+                    sudo apt-get update
+                    sudo apt-get install -y docker-compose || {
+                        log "RED" "❌ Ошибка при установке Docker Compose"
+                        return 1
+                    }
+                    log "GREEN" "✅ Docker Compose успешно установлен"
+                    docker-compose --version
+                fi
+            else
+                log "GREEN" "✅ Docker Compose установлен"
+                if command -v docker-compose &> /dev/null; then
+                    docker-compose --version
+                else
+                    docker compose version
+                fi
+            fi
+        fi
+    fi
+    
+    return 0
+}
+
 # Функция для запуска docker-compose
 docker_compose_cmd() {
     if command -v docker-compose &> /dev/null; then
         docker-compose "$@"
-    else
+    elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
         docker compose "$@"
+    else
+        log "RED" "❌ Не найден docker-compose или docker compose"
+        return 1
     fi
 }
 
@@ -151,6 +345,12 @@ manage_container() {
 
     log "BLUE" "🐳 Управление контейнером..."
     
+    # Проверяем и исправляем установку Docker
+    check_fix_docker || {
+        log "RED" "❌ Необходимо исправить установку Docker для продолжения."
+        return 1
+    }
+    
     # Выводим текущую директорию для отладки
     log "BLUE" "📍 Текущая директория: $(pwd)"
     log "BLUE" "🔍 Проверка наличия docker-compose.yml: $(ls -la | grep docker-compose.yml || echo 'Файл не найден')"
@@ -187,38 +387,24 @@ manage_container() {
         return 1
     fi
 
-    # Добавляем обходное решение для Docker, установленного через snap
-    # Создаем временную копию docker-compose.yml в /tmp для обхода ограничений snap
-    if command -v snap &> /dev/null && snap list | grep -q docker; then
-        log "YELLOW" "⚠️ Обнаружена установка Docker через snap, применяем обходное решение..."
-        TMP_COMPOSE="/tmp/docker-compose-$RANDOM.yml"
-        cp docker-compose.yml "$TMP_COMPOSE"
-        COMPOSE_FILE_PARAM="-f $TMP_COMPOSE"
-    else
-        COMPOSE_FILE_PARAM=""
-    fi
-
     case $action in
         "restart")
             log "BLUE" "🔄 Перезапуск контейнера..."
-            docker_compose_cmd $COMPOSE_FILE_PARAM down --remove-orphans || force_remove_container
-            docker_compose_cmd $COMPOSE_FILE_PARAM up -d
+            docker_compose_cmd down --remove-orphans || force_remove_container
+            docker_compose_cmd up -d
             ;;
         "stop")
             log "BLUE" "⏹️ Остановка контейнера..."
-            docker_compose_cmd $COMPOSE_FILE_PARAM down --remove-orphans || force_remove_container
+            docker_compose_cmd down --remove-orphans || force_remove_container
             ;;
         "start")
             log "BLUE" "▶️ Запуск контейнера..."
             if [ -n "${BOT_NAME:-}" ] && docker ps -a | grep -q "$BOT_NAME"; then
                 force_remove_container
             fi
-            docker_compose_cmd $COMPOSE_FILE_PARAM up -d
+            docker_compose_cmd up -d
             ;;
     esac
-
-    # Удаляем временный файл, если он был создан
-    [ -n "$COMPOSE_FILE_PARAM" ] && [ -f "$TMP_COMPOSE" ] && rm -f "$TMP_COMPOSE"
 
     if [ "$action" = "start" ] || [ "$action" = "restart" ]; then
         log "BLUE" "⏳ Ожидание запуска бота..."
@@ -317,9 +503,10 @@ main_menu() {
         log "GREEN" "6. ❌ Показать логи ошибок"
         log "GREEN" "7. 🔄 Перезапустить бота"
         log "GREEN" "8. 🧹 Очистить старые логи и бэкапы"
+        log "GREEN" "9. 🐳 Проверить и исправить установку Docker"
         log "GREEN" "0. 🚪 Выйти"
 
-        read -r -p "Выберите действие (0-8): " choice
+        read -r -p "Выберите действие (0-9): " choice
 
         case "$choice" in
             1)
@@ -361,16 +548,26 @@ main_menu() {
                 # Реализация очистки логов и бэкапов
                 cleanup_logs
                 ;;
+            9)
+                # Проверка и исправление установки Docker
+                check_fix_docker
+                ;;
             0)
                 log "BLUE" "🚪 Выход..."
                 break
                 ;;
             *)
-                log "RED" "❌ Неверный выбор. Пожалуйста, выберите действие от 0 до 8."
+                log "RED" "❌ Неверный выбор. Пожалуйста, выберите действие от 0 до 9."
                 ;;
         esac
     done
 }
+
+# Проверка прав суперпользователя для управления Docker
+if [ "$EUID" -ne 0 ] && ! groups | grep -q docker && ! sudo -n true 2>/dev/null; then
+    log "YELLOW" "⚠️ Для управления Docker требуются права суперпользователя или членство в группе docker"
+    log "YELLOW" "⚠️ Запустите скрипт с sudo или добавьте пользователя в группу docker и перезайдите в систему"
+fi
 
 # Запускаем основное меню
 main_menu
