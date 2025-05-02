@@ -6,11 +6,15 @@
 [![Redis](https://img.shields.io/badge/Redis-Yes?logo=redis&color=white)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-blue?logo=docker&logoColor=white)](https://www.docker.com/)
 
-**Support Bot** is a specially designed Telegram bot for feedback. With built-in support for topics, all user messages
-are intelligently categorized, promoting organized and streamlined discussion in your group. It provides features such
-as blocking unwanted users, silent mode in topics for discreet conversations, and more. Improve group communication with
+**Support Bot** - это специально разработанный Telegram-бот для обратной связи. Благодаря встроенной поддержке тем все сообщения пользователей
+грамотно распределяются по категориям, способствуя организованному и упорядоченному обсуждению в вашей группе. Он предоставляет такие функции, как
+блокировка нежелательных пользователей, беззвучный режим в темах для незаметных разговоров и многое другое. Улучшите общение в группе с помощью
 Support Bot!
 
+Быстрый старт: 
+```bash
+curl -s https://raw.githubusercontent.com/gopnikgame/support-bot/main/launcher.sh -o /tmp/launcher.sh && sudo bash /tmp/launcher.sh
+```
 **About Limits**:
 <blockquote>
 Specific limits are not specified in the documentation, but the community has shared some rough numbers. 
