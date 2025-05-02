@@ -11,9 +11,6 @@ are intelligently categorized, promoting organized and streamlined discussion in
 as blocking unwanted users, silent mode in topics for discreet conversations, and more. Improve group communication with
 Support Bot!
 
-* Bot example: [@nessshonSupportBot](https://t.me/nessshonSupportBot)
-* Linked group example: [@nessshonSupportGroup](https://t.me/nessshonSupportGroup)
-
 **About Limits**:
 <blockquote>
 Specific limits are not specified in the documentation, but the community has shared some rough numbers. 
@@ -61,23 +58,21 @@ Specific limits are not specified in the documentation, but the community has sh
 4. Add the bot [What's my Telegram ID?](https://t.me/my_id_bot) to the group and save the group ID (referred to
    as `BOT_GROUP_ID` later).
 5. Optionally, customize the bot texts to fit your needs in the file
-   named [texts](https://github.com/nessshon/support-bot/tree/main/app/bot/utils/texts.py).
+   named [texts](https://github.com/gopnikgame/support-bot/tree/main/app/bot/utils/texts.py).
 6. Optionally, add the language you need
-   to [SUPPORTED_LANGUAGES](https://github.com/nessshon/support-bot/tree/main/app/bot/utils/texts.py#L4)
+   to [SUPPORTED_LANGUAGES](https://github.com/gopnikgame/support-bot/tree/main/app/bot/utils/texts.py#L4)
    and add the appropriate codes to
-   the [data](https://github.com/nessshon/support-bot/tree/main/app/bot/utils/texts.py#L49).
+   the [data](https://github.com/gopnikgame/support-bot/tree/main/app/bot/utils/texts.py#L49).
 
 </details>
 
 <details>
 <summary><b>Installation</b></summary>
 
-You need your own server or you can rent one from a hosting provider. For this, check out the [Recommended Hosting Provider](#recommended-hosting-provider) section below.
-
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/nessshon/support-bot.git
+    git clone https://github.com/gopnikgame/support-bot.git
     ```
 
 2. Change into the bot directory:
@@ -363,24 +358,6 @@ Here is a comprehensive reference guide for the environment variables used in th
 
 </details>
 
-## Recommended Hosting Provider
-
-I recommend using [aeza.net](https://aeza.net/?ref=362599) for your hosting needs. Here's why:
-
-- **24/7 Support**: Quick and effective support via chat or phone.
-- **Promo Plan for €1**: Great for testing Telegram bots and small websites.
-- **Easy Backups**: Secure backups on independent servers.
-- **Hourly Billing**: Rent a server by the hour for testing or demos.
-- **Anti-DDoS Protection**: Reliable and secure internet connection for your business.
-- **Multiple Payment Methods**: Supports various payment methods, including cryptocurrencies like TON.
-
-Learn more at [aeza.net](https://aeza.net/?ref=362599).
-
-## Donations
-
-**TON** - `EQC-3ilVr-W0Uc3pLrGJElwSaFxvhXXfkiQA3EwdVBHNNess`
-
-**USDT** (TRC-20) - `TGKmm9H3FApFw8xcgRcZDHSku68vozAjo9`
 
 ## Contribution
 
