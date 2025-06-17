@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Аргумент для имени экземпляра (по умолчанию - пустая строка)
+INSTANCE_NAME="${1:-}"
+
 # Определяем корневой каталог проекта (теперь скрипт находится в корне)
 ROOT_DIR="$(dirname "$(readlink -f "$0")")"
 cd "$ROOT_DIR" || { echo "Ошибка перехода в директорию проекта"; exit 1; }
@@ -16,6 +19,14 @@ MAGENTA='\033[0;35m'
 CYAN='\033[0;36m'
 WHITE='\033[0;37m'
 NC='\033[0m' # No Color
+
+# Название бота для контейнера и префикса
+DEFAULT_BOT_NAME="support-bot"
+if [ -n "$INSTANCE_NAME" ]; then
+    BOT_NAME="${DEFAULT_BOT_NAME}_${INSTANCE_NAME}"
+else
+    BOT_NAME="${DEFAULT_BOT_NAME}"
+fi
 
 # Файлы логов
 LOGS_DIR="$ROOT_DIR/logs"
@@ -260,6 +271,10 @@ manage_env_file() {
             cp "$env_example" "$env_file"
             created=true
             log "GREEN" "✅ Создан новый .env файл из примера"
+            
+            # Автоматически обновляем BOT_NAME в .env файле
+            sed -i "s/BOT_NAME=support-bot/BOT_NAME=$BOT_NAME/" "$env_file"
+            log "GREEN" "✅ BOT_NAME обновлен на $BOT_NAME в файле .env"
         else
             log "YELLOW" "⚠️ Файл .env.example не найден, создаем базовый .env"
             cat > "$env_file" << EOL
@@ -268,7 +283,7 @@ BOT_TOKEN=your_bot_token_here
 BOT_DEV_ID=your_dev_id_here
 BOT_GROUP_ID=your_group_id_here
 BOT_EMOJI_ID=5417915203100613993
-BOT_NAME=support-bot
+BOT_NAME=$BOT_NAME
 
 REDIS_HOST=redis
 REDIS_PORT=6379
@@ -276,6 +291,13 @@ REDIS_DB=0
 EOL
             created=true
             log "YELLOW" "⚠️ Создан базовый .env файл. Пожалуйста, обновите токен бота и другие данные!"
+        fi
+    else
+        # Проверяем, соответствует ли BOT_NAME в .env файле текущему имени экземпляра
+        if ! grep -q "BOT_NAME=$BOT_NAME" "$env_file"; then
+            log "YELLOW" "⚠️ Обновляем BOT_NAME в .env файле..."
+            sed -i "s/BOT_NAME=.*/BOT_NAME=$BOT_NAME/" "$env_file"
+            log "GREEN" "✅ BOT_NAME обновлен на $BOT_NAME"
         fi
     fi
 
@@ -423,13 +445,8 @@ manage_container() {
 
 # Функция для принудительного удаления контейнера
 force_remove_container() {
-    if [ -z "${BOT_NAME:-}" ]; then
-        log "RED" "❌ Переменная BOT_NAME не установлена. Невозможно удалить контейнер."
-        return 1
-    fi
-
     if docker ps -a | grep -q "$BOT_NAME"; then
-        log "YELLOW" "⚠️ Принудительное удаление контейнера..."
+        log "YELLOW" "⚠️ Принудительное удаление контейнера $BOT_NAME..."
         docker stop "$BOT_NAME" || true
         docker rm "$BOT_NAME" || true
     fi

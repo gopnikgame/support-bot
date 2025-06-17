@@ -14,6 +14,17 @@ Quick start:
 ```bash
 curl -s https://raw.githubusercontent.com/gopnikgame/support-bot/main/launcher.sh -o /tmp/launcher.sh && sudo bash /tmp/launcher.sh
 ```
+
+Multiple bots on one server:
+```bash
+curl -s https://raw.githubusercontent.com/gopnikgame/support-bot/main/launcher.sh -o /tmp/launcher.sh && sudo bash /tmp/launcher.sh 2
+```
+
+Install bot with custom name
+```bash
+curl -s https://raw.githubusercontent.com/gopnikgame/support-bot/main/launcher.sh -o /tmp/launcher.sh && sudo bash /tmp/launcher.sh project1
+```
+
 **About Limits**:
 <blockquote>
 Specific limits are not specified in the documentation, but the community has shared some rough numbers. 
@@ -58,6 +69,18 @@ Specific limits are not specified in the documentation, but the community has sh
 ```bash
 curl -s https://raw.githubusercontent.com/gopnikgame/support-bot/main/launcher.sh -o /tmp/launcher.sh && sudo bash /tmp/launcher.sh
 ```
+
+Несколько ботов на одном сервере:
+Установка дополнительного экземпляра бота с числовым суффиксом
+```bash
+curl -s https://raw.githubusercontent.com/gopnikgame/support-bot/main/launcher.sh -o /tmp/launcher.sh && sudo bash /tmp/launcher.sh 2
+```
+
+Установка бота с пользовательским названием
+```bash
+curl -s https://raw.githubusercontent.com/gopnikgame/support-bot/main/launcher.sh -o /tmp/launcher.sh && sudo bash /tmp/launcher.sh project1
+```
+
 **О лимитах**:
 <blockquote>
 Конкретные ограничения не указаны в документации, но сообщество поделилось примерными цифрами.
