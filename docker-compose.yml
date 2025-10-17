@@ -5,7 +5,7 @@ services:
   bot:
     build:
       context: .
-    container_name: support-bot
+    container_name: ${BOT_NAME:-support-bot}
     command: sh -c "cd /usr/src/app && python -m app"
     restart: always
     depends_on:
@@ -19,7 +19,7 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: support-redis
+    container_name: ${BOT_NAME:-support-bot}-redis
     restart: always
     volumes:
       - ./redis/data/:/data
