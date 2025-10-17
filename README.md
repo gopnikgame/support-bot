@@ -4,8 +4,11 @@ Telegram бот для технической поддержки с интегр
 
 ## 🚀 Быстрый старт
 
+### Быстрый старт
+```bash
+curl -sSL https://raw.githubusercontent.com/gopnikgame/support-bot/main/launcher.sh -o launcher.sh && chmod +x launcher.sh && ./launcher.sh
+```
 ### Установка
-
 ```bash
 # Установка основного экземпляра
 sudo bash launcher.sh
